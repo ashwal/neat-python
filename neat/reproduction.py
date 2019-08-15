@@ -186,3 +186,6 @@ class DefaultReproduction(DefaultClassConfig):
                 self.ancestors[gid] = (parent1_id, parent2_id)
 
         return new_population
+
+
+class SexualReproduction():

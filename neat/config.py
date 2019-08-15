@@ -9,7 +9,7 @@ try:
 except ImportError:
     from ConfigParser import SafeConfigParser as ConfigParser
 
-from neat.six_util import iterkeys
+from .six_util import iterkeys
 
 
 class ConfigParameter(object):

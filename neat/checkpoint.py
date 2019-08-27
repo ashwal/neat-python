@@ -21,7 +21,7 @@ class Checkpointer(BaseReporter):
     """
 
     def __init__(self, generation_interval=100, time_interval_seconds=300,
-                 filename_prefix='neat-checkpoint-'):
+                 filename_prefix='./checkpoints/neat-checkpoint-'):
         """
         Saves the current state (at the end of a generation) every ``generation_interval`` generations or
         ``time_interval_seconds``, whichever happens first.
@@ -40,6 +40,11 @@ class Checkpointer(BaseReporter):
         self.last_generation_checkpoint = -1
         self.last_time_checkpoint = time.time()
 
+        self.best_genome = "Hello there"
+
+    def post_evaluate(self, config, population, species, best_genome):
+        self.best_genome = best_genome
+
     def start_generation(self, generation):
         self.current_generation = generation
 
@@ -57,23 +62,24 @@ class Checkpointer(BaseReporter):
                 checkpoint_due = True
 
         if checkpoint_due:
-            self.save_checkpoint(config, population, species_set, self.current_generation)
+            self.save_checkpoint(config, population, species_set, self.current_generation, self.best_genome)
             self.last_generation_checkpoint = self.current_generation
             self.last_time_checkpoint = time.time()
 
-    def save_checkpoint(self, config, population, species_set, generation):
+    def save_checkpoint(self, config, population, species_set, generation, best_genome):
         """ Save the current simulation state. """
         filename = '{0}{1}'.format(self.filename_prefix, generation)
         print("Saving checkpoint to {0}".format(filename))
-
         with gzip.open(filename, 'w', compresslevel=5) as f:
-            data = (generation, config, population, species_set, random.getstate())
+            print("SAVING {0}".format(best_genome))
+            data = (generation, config, population, species_set, best_genome, random.getstate())
             pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def restore_checkpoint(filename):
         """Resumes the simulation from a previous saved point."""
         with gzip.open(filename) as f:
-            generation, config, population, species_set, rndstate = pickle.load(f)
+            generation, config, population, species_set, best_genome, rndstate = pickle.load(f)
+            print("loading {0}".format(best_genome))
             random.setstate(rndstate)
-            return Population(config, (population, species_set, generation))
+            return Population(config, (population, species_set, generation, best_genome))

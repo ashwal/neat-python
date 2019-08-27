@@ -568,3 +568,11 @@ class DefaultGenome(object):
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
             self.connections[connection.key] = connection
+
+class SexGenome(DefaultGenome):
+
+    def mateChoice(self, choice):
+        
+        #net = neat.nn.FeedForwardNetwork.create(genome, config)
+        #output = net.activate((0,0,0,0) + len(choice.nodes))
+        return True

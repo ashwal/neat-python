@@ -1,13 +1,13 @@
 """A NEAT (NeuroEvolution of Augmenting Topologies) implementation"""
 
 import neat.nn as nn
-import neat.ctrnn as ctrnn
-import neat.iznn as iznn
+#import neat.ctrnn as ctrnn
+#import neat.iznn as iznn
 import neat.distributed as distributed
 
 from neat.config import Config
 from neat.population import Population, CompleteExtinctionException
-from neat.genome import DefaultGenome
+from neat.genome import DefaultGenome, SexGenome
 from neat.reproduction import DefaultReproduction
 from neat.stagnation import DefaultStagnation
 from neat.reporting import StdOutReporter

@@ -182,39 +182,64 @@ class DefaultReproduction(DefaultClassConfig):
             #Up to them if they want to breed
             #Equilbrium will met where genes that are too selective die off
             #But those that aren't selective enough won't gain a fitness advantage
-            mate_barrier = .50
-            mate_attempts = 0
-            while spawn > 0:
-                #If we've tried with a random assorment, lower the barrier and try again
-                if mate_attempts == len(old_members) * 2:
-                    mate_barrier -= .01
-                    mate_attempts = 0
-                else:
-                    mate_attempts += 1
-
-                parent1_id, parent1 = random.choice(old_members)
-                parent2_id, parent2 = random.choice(old_members)
-
-                net1 = neat.nn.FeedForwardNetwork.create(parent1, config)
-                net2 = neat.nn.FeedForwardNetwork.create(parent2, config)
-                #print(parent1)
-                parent_1_mate_choice = net1.activate([0,0,0, len(parent2.nodes)])[4]
-                parent_2_mate_choice = net2.activate([0,0,0, len(parent1.nodes)])[4]
-
-                #print(net1.activate([0,0,0, len(parent2.nodes)]))
-
-                if(parent_1_mate_choice >= mate_barrier and parent_2_mate_choice >= mate_barrier):
-                    spawn -= 1
-
-                    # Note that if the parents are not distinct, crossover will produce a
-                    # genetically identical clone of the parent (but with a different ID).
-                    gid = next(self.genome_indexer)
-                    child = config.genome_type(gid)
-                    child.configure_crossover(parent1, parent2, config.genome_config)
-                    child.mutate(config.genome_config)
-                    new_population[gid] = child
-                    self.ancestors[gid] = (parent1_id, parent2_id)
+            
+            new_population = self.mate_choice(config, spawn, old_members, new_population)
 
         return new_population
 
+    def mate_choice(self, config, spawn, old_members, new_population):
+        while spawn > 0:
+            spawn -= 1
 
+            parent1_id, parent1 = random.choice(old_members)
+            parent2_id, parent2 = random.choice(old_members)
+
+            # Note that if the parents are not distinct, crossover will produce a
+            # genetically identical clone of the parent (but with a different ID).
+            gid = next(self.genome_indexer)
+            child = config.genome_type(gid)
+            child.configure_crossover(parent1, parent2, config.genome_config)
+            child.mutate(config.genome_config)
+            new_population[gid] = child
+            self.ancestors[gid] = (parent1_id, parent2_id)
+
+        return new_population
+
+class SexReproduction(DefaultReproduction):
+    
+    def mate_choice(self, config, spawn, old_members, new_population):
+        mate_barrier = .50
+        mate_attempts = 0
+
+        while spawn > 0:
+            #If we've tried with a random assorment, lower the barrier and try again
+            if mate_attempts == len(old_members) * 2:
+                mate_barrier -= .01
+                mate_attempts = 0
+            else:
+                mate_attempts += 1
+
+            parent1_id, parent1 = random.choice(old_members)
+            parent2_id, parent2 = random.choice(old_members)
+
+            net1 = neat.nn.FeedForwardNetwork.create(parent1, config)
+            net2 = neat.nn.FeedForwardNetwork.create(parent2, config)
+            #print(parent1)
+            parent_1_mate_choice = net1.activate([0,0,0, len(parent2.nodes)])[4]
+            parent_2_mate_choice = net2.activate([0,0,0, len(parent1.nodes)])[4]
+
+            #print(net1.activate([0,0,0, len(parent2.nodes)]))
+
+            if(parent_1_mate_choice >= mate_barrier and parent_2_mate_choice >= mate_barrier):
+                spawn -= 1
+
+                # Note that if the parents are not distinct, crossover will produce a
+                # genetically identical clone of the parent (but with a different ID).
+                gid = next(self.genome_indexer)
+                child = config.genome_type(gid)
+                child.configure_crossover(parent1, parent2, config.genome_config)
+                child.mutate(config.genome_config)
+                new_population[gid] = child
+                self.ancestors[gid] = (parent1_id, parent2_id)
+
+        return new_population

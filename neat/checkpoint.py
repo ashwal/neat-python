@@ -21,7 +21,7 @@ class Checkpointer(BaseReporter):
     """
 
     def __init__(self, generation_interval=100, time_interval_seconds=300,
-                 filename_prefix='./checkpoints/neat-checkpoint-'):
+                 filename_prefix='./checkpoints/neat-checkpoint-', total_generations=None):
         """
         Saves the current state (at the end of a generation) every ``generation_interval`` generations or
         ``time_interval_seconds``, whichever happens first.
@@ -40,7 +40,8 @@ class Checkpointer(BaseReporter):
         self.last_generation_checkpoint = -1
         self.last_time_checkpoint = time.time()
 
-        self.best_genome = "Hello there"
+        self.total_generations = total_generations
+
 
     def post_evaluate(self, config, population, species, best_genome):
         self.best_genome = best_genome
@@ -50,6 +51,9 @@ class Checkpointer(BaseReporter):
 
     def end_generation(self, config, population, species_set):
         checkpoint_due = False
+
+        if self.total_generations and self.total_generations-1 is self.current_generation:
+            checkpoint_due = True
 
         if self.time_interval_seconds is not None:
             dt = time.time() - self.last_time_checkpoint
@@ -71,7 +75,6 @@ class Checkpointer(BaseReporter):
         filename = '{0}{1}'.format(self.filename_prefix, generation)
         print("Saving checkpoint to {0}".format(filename))
         with gzip.open(filename, 'w', compresslevel=5) as f:
-            print("SAVING {0}".format(best_genome))
             data = (generation, config, population, species_set, best_genome, random.getstate())
             pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -80,6 +83,5 @@ class Checkpointer(BaseReporter):
         """Resumes the simulation from a previous saved point."""
         with gzip.open(filename) as f:
             generation, config, population, species_set, best_genome, rndstate = pickle.load(f)
-            print("loading {0}".format(best_genome))
             random.setstate(rndstate)
             return Population(config, (population, species_set, generation, best_genome))

@@ -172,6 +172,8 @@ class DefaultGenome(object):
         # Fitness results.
         self.fitness = None
 
+        self.ornament = 0
+
     def configure_new(self, config):
         """Configure a new genome based on the given configuration."""
 

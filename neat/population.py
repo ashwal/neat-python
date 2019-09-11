@@ -21,6 +21,7 @@ class Population(object):
     """
 
     def __init__(self, config, initial_state=None):
+
         self.reporters = ReporterSet()
         self.config = config
         stagnation = config.stagnation_type(config.stagnation_config, self.reporters)
@@ -42,6 +43,7 @@ class Population(object):
             self.population = self.reproduction.create_new(config.genome_type,
                                                            config.genome_config,
                                                            config.pop_size)
+            self.best_genome = None
             self.species = config.species_set_type(config.species_set_config, self.reporters)
             self.generation = 0
             self.species.speciate(config, self.population, self.generation)
@@ -74,6 +76,8 @@ class Population(object):
         the genomes themselves (apart from updating the fitness member),
         or the configuration object.
         """
+
+        self.total_generations = n
 
         if self.config.no_fitness_termination and (n is None):
             raise RuntimeError("Cannot have no generational limit with no fitness termination")

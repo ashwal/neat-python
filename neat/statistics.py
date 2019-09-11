@@ -93,14 +93,15 @@ class StatisticsReporter(BaseReporter):
         """Returns the most fit genome ever seen."""
         return self.best_genomes(1)[0]
 
-    def save(self):
-        self.save_genome_fitness()
-        self.save_species_count()
-        self.save_species_fitness()
+    def save(self, prefix_path=''):
+        self.save_genome_fitness(filename=prefix_path+'fitness_history.csv')
+        self.save_species_count(filename=prefix_path+'speciation.csv')
+        self.save_species_fitness(filename=prefix_path+'species_fitness.csv')
 
     def save_genome_fitness(self,
                             delimiter=' ',
                             filename='fitness_history.csv',
+
                             with_cross_validation=False):
         """ Saves the population's best and average fitness. """
         with open(filename, 'w') as f:
